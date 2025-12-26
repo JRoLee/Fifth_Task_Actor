@@ -23,10 +23,17 @@ void AChallengeActor::Move(TArray<FVector>* Location)
 	//Move random location
 	FVector NewLocation = FVector(RandNum1, RandNum2, RandNum3);
 	SetActorLocation(NewLocation);
+
+	//Add moved location to array
 	Location->Add(FVector(NewLocation));
 
 	//Print moved location
 	FVector ActorLocation = GetActorLocation();
+	if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 100.0f, FColor::Blue,
+			FString::Printf(TEXT("Actor Location: %s"), *ActorLocation.ToString()));
+	}
 }
 
 void AChallengeActor::Turn()
@@ -44,8 +51,10 @@ void AChallengeActor::Turn()
 	SetActorRotation(NewRotation);
 }
 
+//Random Evnet triggered when obeject moves
 void RandEvent(int Posibility, int* EventNum)
 {
+	//Random Event triggered by posibility
 	int RandNum = FMath::RandRange(1, 100);
 	if (RandNum > Posibility)
 	{
@@ -54,6 +63,7 @@ void RandEvent(int Posibility, int* EventNum)
 			GEngine->AddOnScreenDebugMessage(-1, 100.0f, FColor::Orange,
 				FString::Printf(TEXT("Event Triggered!")));
 		}
+		//Add EventNum +1 when evnet triggered
 		*EventNum += 1;
 	}
 	else
@@ -63,6 +73,7 @@ void RandEvent(int Posibility, int* EventNum)
 	}
 }
 
+//Calculate distance between two location
 float Distance(const FVector& first, const FVector& second)
 {
 	float dx = first.X - second.X;
@@ -72,18 +83,13 @@ float Distance(const FVector& first, const FVector& second)
 	return FMath::Sqrt(dx * dx + dy * dy + dz * dz);
 }
 
+//Calculate total distance moved by the actor.
 float TotalDistance(const TArray<FVector>& Array)
 {
 	float TotalDistance = 0;
 	for (int i = 0; i < Array.Num()-1; i++)
 	{
 		TotalDistance += Distance(Array[i], Array[i + 1]);
-
-		if (GEngine)
-		{
-			GEngine->AddOnScreenDebugMessage(-1, 100.0f, FColor::Red,
-				FString::Printf(TEXT("TotalDistance: %f"),TotalDistance));
-		}
 	}
 	return TotalDistance;
 }
@@ -94,6 +100,7 @@ void AChallengeActor::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	//Set initial total evnet number and location array
 	int EventNum = 0;
 	TArray<FVector> LocationArray;
 
@@ -105,9 +112,10 @@ void AChallengeActor::BeginPlay()
 		GEngine->AddOnScreenDebugMessage(-1, 100.0f, FColor::Blue,
 			FString::Printf(TEXT("Actor Start Location: %s"), *StartLocation.ToString()));
 	}
+	//Add start location to location array
 	LocationArray.Add(FVector(StartLocation));
 
-	//10 times move and rotate
+	//10 times move and rotate trigger random event
 	for (int i = 0; i < 10; i++)
 	{
 		Move(&LocationArray);
@@ -115,14 +123,16 @@ void AChallengeActor::BeginPlay()
 		RandEvent(50, &EventNum);
 	}
 
+	//Set total moved distance
 	float Distance = TotalDistance(LocationArray);
 	
+	//Print total triggerd event number and total moved distance
 	if (GEngine)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 100.0f, FColor::Green,
-			FString::Printf(TEXT("Event happend: %d times"),EventNum));
+		GEngine->AddOnScreenDebugMessage(-1, 100.0f, FColor::Purple,
+			FString::Printf(TEXT("Event triggered: %d times"),EventNum));
 
-		GEngine->AddOnScreenDebugMessage(-1, 100.0f, FColor::Green,
+		GEngine->AddOnScreenDebugMessage(-1, 100.0f, FColor::Purple,
 			FString::Printf(TEXT("Total moved distance: %f"), Distance));
 	}
 

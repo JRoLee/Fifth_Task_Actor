@@ -22,6 +22,8 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	//Move Turn function
 	void Move();
 	void Turn();
 };
